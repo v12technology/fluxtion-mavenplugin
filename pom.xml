@@ -31,8 +31,32 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <maven.version>3.2.5</maven.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
+    <licenses>
+        <license>
+            <distribution>repo</distribution>
+            <name>GNU General Public License, version 3</name>
+            <url>http://www.gnu.org/licenses/gpl.txt</url>
+        </license>
+    </licenses>
+    
+    <developers>
+        <developer>
+            <name>Greg Higgins</name>
+            <email>greg.higgins@v12technology.com</email>
+            <organization>V12 Technology Limited</organization>
+        </developer>
+    </developers>
+    
+    <scm>
+        <connection>scm:git:https://github.com/v12technology/fluxtion-mavenplugin.git</connection>
+        <developerConnection>scm:git:https://github.com/v12technology/fluxtion-mavenplugin.git</developerConnection>
+        <url>https://github.com/v12technology/fluxtion-mavenplugin</url>
+    </scm>
+    
     <distributionManagement>
         <repository>
             <id>myMavenRepo.write</id>
@@ -72,7 +96,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                     <username>${fluxtion.github.user}</username>
                     <password>${fluxtion.github.password}</password>
                 </configuration>
-            </plugin>            
+            </plugin>  
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>1.12</version>
+                <executions>
+                    <execution>
+                        <id>download-license-description</id>
+                        <goals>
+                            <goal>add-third-party</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>      
         </plugins>
         
         <pluginManagement>
