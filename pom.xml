@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
 
     <groupId>com.fluxtion</groupId>
     <artifactId>fluxtion-maven-plugin</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>maven-plugin</packaging>
     <name>fluxtion :: maven plugin</name>
 
@@ -31,8 +31,32 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <maven.version>3.2.5</maven.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
+    <licenses>
+        <license>
+            <distribution>repo</distribution>
+            <name>GNU General Public License, version 3</name>
+            <url>http://www.gnu.org/licenses/gpl.txt</url>
+        </license>
+    </licenses>
+    
+    <developers>
+        <developer>
+            <name>Greg Higgins</name>
+            <email>greg.higgins@v12technology.com</email>
+            <organization>V12 Technology Limited</organization>
+        </developer>
+    </developers>
+    
+    <scm>
+        <connection>scm:git:https://github.com/v12technology/fluxtion-mavenplugin.git</connection>
+        <developerConnection>scm:git:https://github.com/v12technology/fluxtion-mavenplugin.git</developerConnection>
+        <url>https://github.com/v12technology/fluxtion-mavenplugin</url>
+    </scm>
+    
     <distributionManagement>
         <repository>
             <id>myMavenRepo.write</id>
@@ -72,7 +96,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
                     <username>${fluxtion.github.user}</username>
                     <password>${fluxtion.github.password}</password>
                 </configuration>
-            </plugin>            
+            </plugin>  
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>1.12</version>
+                <executions>
+                    <execution>
+                        <id>download-license-description</id>
+                        <goals>
+                            <goal>add-third-party</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>      
         </plugins>
         
         <pluginManagement>
@@ -103,7 +140,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             </plugins>
         </pluginManagement>
     </build>
-    
 
     <dependencies>
         <dependency>
@@ -140,44 +176,4 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         </dependency>
     </dependencies>
 
-    <profiles>
-        <profile>
-            <id>run-its</id>
-            <build>
-
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-invoker-plugin</artifactId>
-                        <version>1.7</version>
-                        <configuration>
-                            <debug>true</debug>
-                            <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
-                            <pomIncludes>
-                                <pomInclude>*/pom.xml</pomInclude>
-                            </pomIncludes>
-                            <postBuildHookScript>verify</postBuildHookScript>
-                            <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
-                            <settingsFile>src/it/settings.xml</settingsFile>
-                            <goals>
-                                <goal>clean</goal>
-                                <goal>test-compile</goal>
-                            </goals>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>integration-test</id>
-                                <goals>
-                                    <goal>install</goal>
-                                    <goal>integration-test</goal>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-
-            </build>
-        </profile>
-    </profiles>
 </project>
