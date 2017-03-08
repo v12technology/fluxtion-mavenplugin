@@ -197,10 +197,10 @@ public class FluxtionGeneratorMojo extends AbstractMojo {
     @Parameter(property = "resourcesOutputDirectory")
     private String resourcesOutputDirectory;
 
-    @Parameter(property = "templateSep", defaultValue = "javaTemplate.vsl")
+    @Parameter(property = "templateSep")
     private String templateSep;
 
-    @Parameter(property = "templateDebugSep", defaultValue = "javaTemplateDebug.vsl")
+    @Parameter(property = "templateDebugSep")
     private String templateDebugSep;
 
     @Parameter(property = "supportDirtyFiltering", defaultValue = "true")
