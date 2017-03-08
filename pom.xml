@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
 
     <groupId>com.fluxtion</groupId>
     <artifactId>fluxtion-maven-plugin</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
     <name>fluxtion :: maven plugin</name>
 
