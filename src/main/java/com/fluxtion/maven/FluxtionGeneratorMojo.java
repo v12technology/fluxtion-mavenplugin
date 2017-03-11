@@ -23,12 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.BuildPluginManager;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.descriptor.PluginDescriptor;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -55,7 +51,6 @@ public class FluxtionGeneratorMojo extends AbstractMojo {
             updateClasspath();
             try {
                 setDefaultProperties();
-                getLog().info("=========== Fluxtion gen started  ==============");
                 ProcessBuilder processBuilder = new ProcessBuilder();
                 List<String> cmdList = new ArrayList<>();
                 cmdList.add(fluxtionExePath.getCanonicalPath());
@@ -119,15 +114,16 @@ public class FluxtionGeneratorMojo extends AbstractMojo {
                 processBuilder.inheritIO();
                 getLog().info(processBuilder.command().stream().collect(Collectors.joining(" ")));
                 Process p = processBuilder.start();
-                p.waitFor();
-                getLog().info("=========== Fluxtion gen complete ==============");
+                if(p.waitFor()<0 && !ignoreErrors){
+                    throw new RuntimeException("unable to execute fluxtion");
+                }
             } catch (IOException | InterruptedException e) {
                 getLog().error("error while invoking Fluxtion generator", e);
-                getLog().info("=========== Fluxtion gen ERROR =================");
+                throw new RuntimeException(e);
             }
         } catch (MalformedURLException | DependencyResolutionRequiredException ex) {
                 getLog().error("error while building classpath", ex);
-                getLog().info("=========== Fluxtion gen ERROR =================");
+                throw new RuntimeException(ex);
         }
     }
     
@@ -148,21 +144,11 @@ public class FluxtionGeneratorMojo extends AbstractMojo {
         }
     }
 
-    @Parameter(property = "project", readonly = true, required = true)
+    @Parameter(defaultValue = "${project}", required = true, readonly = true)
     private MavenProject project;
-
-    @Parameter(defaultValue = "${session}", readonly = true)
-    private MavenSession mavenSession;
-
-    @Component
-    private BuildPluginManager pluginManager;
-
-    
+ 
     @Parameter(property = "fluxtionExe", required = true)
     private File fluxtionExePath;
-    
-    @Parameter(property = "plugin")
-    private PluginDescriptor descriptor;
 
     @Parameter(property = "configClass")
     private String configClass;
@@ -221,6 +207,12 @@ public class FluxtionGeneratorMojo extends AbstractMojo {
     @Parameter(property = "logDebug", defaultValue = "false")
     public boolean logDebug;
 
+    @Parameter(property = "ignoreErrors", defaultValue = "false")
+    /**
+     * continue build even if fluxtion tool returns an error
+     */
+    public boolean ignoreErrors;
+    
     private void updateClasspath() throws MojoExecutionException, MalformedURLException, DependencyResolutionRequiredException {
         StringBuilder sb = new StringBuilder();
         List<String> elements = project.getRuntimeClasspathElements();
