@@ -23,12 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.BuildPluginManager;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.descriptor.PluginDescriptor;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -55,11 +51,10 @@ public class FluxtionGeneratorMojo extends AbstractMojo {
             updateClasspath();
             try {
                 setDefaultProperties();
-                getLog().info("=========== Fluxtion gen started  ==============");
                 ProcessBuilder processBuilder = new ProcessBuilder();
                 List<String> cmdList = new ArrayList<>();
                 cmdList.add(fluxtionExePath.getCanonicalPath());
-                if(logDebug){
+                if (logDebug) {
                     cmdList.add("--debug");
                 }
                 cmdList.add("-outDirectory");
@@ -87,30 +82,30 @@ public class FluxtionGeneratorMojo extends AbstractMojo {
                 cmdList.add("-assignPrivate");
                 cmdList.add(Boolean.toString(assignNonPublicMembers));
                 //optionals
-                if(nodeNamingClass!=null){
+                if (nodeNamingClass != null) {
                     cmdList.add("-nodeNamingClass");
                     cmdList.add(nodeNamingClass);
                 }
-                if(filterNamingClass!=null){
+                if (filterNamingClass != null) {
                     cmdList.add("-filterNamingClass");
                     cmdList.add(filterNamingClass);
                 }
-                if(rootFactoryClass!=null){
+                if (rootFactoryClass != null) {
                     cmdList.add("-rootFactoryClass");
                     cmdList.add(rootFactoryClass);
                 }
-                if(yamlFactoryConfig!=null){
+                if (yamlFactoryConfig != null) {
                     cmdList.add("-yamlFactoryConfig");
                     cmdList.add(yamlFactoryConfig.getCanonicalPath());
                 }
-                if(templateSep!=null){
+                if (templateSep != null) {
                     cmdList.add("-sepTemplate");
                     cmdList.add(templateSep);
                 }
-                if(templateDebugSep!=null){
+                if (templateDebugSep != null) {
                     cmdList.add("-sepDebugTemplate");
                     cmdList.add(templateDebugSep);
-                }                
+                }
                 //must be at end
                 cmdList.add("-cp");
                 cmdList.add(classPath);
@@ -119,18 +114,19 @@ public class FluxtionGeneratorMojo extends AbstractMojo {
                 processBuilder.inheritIO();
                 getLog().info(processBuilder.command().stream().collect(Collectors.joining(" ")));
                 Process p = processBuilder.start();
-                p.waitFor();
-                getLog().info("=========== Fluxtion gen complete ==============");
+                if (p.waitFor() < 0 && !ignoreErrors) {
+                    throw new RuntimeException("unable to execute fluxtion");
+                }
             } catch (IOException | InterruptedException e) {
                 getLog().error("error while invoking Fluxtion generator", e);
-                getLog().info("=========== Fluxtion gen ERROR =================");
+                throw new RuntimeException(e);
             }
         } catch (MalformedURLException | DependencyResolutionRequiredException ex) {
-                getLog().error("error while building classpath", ex);
-                getLog().info("=========== Fluxtion gen ERROR =================");
+            getLog().error("error while building classpath", ex);
+            throw new RuntimeException(ex);
         }
     }
-    
+
     private void setDefaultProperties() throws MojoExecutionException, IOException {
         try {
             if (outputDirectory == null || outputDirectory.length() < 1) {
@@ -139,7 +135,7 @@ public class FluxtionGeneratorMojo extends AbstractMojo {
             if (resourcesOutputDirectory == null || resourcesOutputDirectory.length() < 1) {
                 resourcesOutputDirectory = project.getBasedir().getCanonicalPath() + "/target/generated-sources/sep";
             }
-            if(buildDirectory == null){
+            if (buildDirectory == null) {
                 buildDirectory = project.getBasedir().getCanonicalPath() + "/target/classes";
             }
         } catch (IOException iOException) {
@@ -148,78 +144,147 @@ public class FluxtionGeneratorMojo extends AbstractMojo {
         }
     }
 
-    @Parameter(property = "project", readonly = true, required = true)
+    @Parameter(defaultValue = "${project}", required = true, readonly = true)
     private MavenProject project;
 
-    @Parameter(defaultValue = "${session}", readonly = true)
-    private MavenSession mavenSession;
-
-    @Component
-    private BuildPluginManager pluginManager;
-
-    
+    /**
+     * The path to fluxtion executable
+     */
     @Parameter(property = "fluxtionExe", required = true)
     private File fluxtionExePath;
-    
-    @Parameter(property = "plugin")
-    private PluginDescriptor descriptor;
 
+    /**
+     * The fully qualified name of SEPConfig class that fluxtion will use to
+     * build the static event processor
+     */
     @Parameter(property = "configClass")
     private String configClass;
 
+    /**
+     * Fully qualified name of NodeNameProducer implementation class , that
+     * provides strategy to name nodes in generated static event processor.
+     */
     @Parameter(property = "nodeNamingClass")
     private String nodeNamingClass;
 
+    /**
+     * Fully qualified name of FilterDescriptionProducer implementation class,
+     * hat provides strategy to name filters in generated static event
+     * processor.
+     */
     @Parameter(property = "filterNamingClass")
     private String filterNamingClass;
 
+    /**
+     * The output package of the generated static event processor.
+     */
     @Parameter(property = "packageName", required = true)
     private String packageName;
 
+    /**
+     * The simple class name of the generated static event processor.
+     */
     @Parameter(property = "className", required = true)
     private String className;
 
+    /**
+     * The fully qualified name of a root NoceFactory class that will be used in
+     * conjunction of the yaml factory configuration to generate a static event
+     * processor.
+     */
     @Parameter(property = "rootFactoryClass", required = false)
     private String rootFactoryClass;
 
+    /**
+     * The yaml configuration that is used in conjunction with a root
+     * NoceFactory to generate a static event processor.
+     */
     @Parameter(property = "yamlFactoryConfig", required = false)
     private File yamlFactoryConfig;
 
+    /**
+     * The output directory for source artifacts generated by fluxtion.
+     */
     @Parameter(property = "outputDirectory")
     private String outputDirectory;
 
+    /**
+     * The output directory for build artifacts generated by fluxtion.
+     */
     @Parameter(property = "buildDirectory")
     private String buildDirectory;
 
+    /**
+     * The output directory for resources generated by fluxtion, such as a
+     * meta-data describing the static event processor
+     */
     @Parameter(property = "resourcesOutputDirectory")
     private String resourcesOutputDirectory;
 
+    /**
+     * Override the velocity template file that is used by fluxtion to generate
+     * the static event processor
+     */
     @Parameter(property = "templateSep")
     private String templateSep;
 
+    /**
+     * Override the velocity template file that is used by fluxtion to generate
+     * the debug static event processor
+     */
     @Parameter(property = "templateDebugSep")
     private String templateDebugSep;
 
+    /**
+     * Override whether the generated static event processor supports dirty
+     * filtering.
+     */
     @Parameter(property = "supportDirtyFiltering", defaultValue = "true")
     private boolean supportDirtyFiltering;
 
+    /**
+     * Generate a debug version of the static event processor for use with the
+     * fluxtion graphical debugger tool.
+     */
     @Parameter(property = "generateDebugPrep", defaultValue = "false")
     public boolean generateDebugPrep;
 
+    /**
+     * Generate a test decorator for the static event processor
+     */
     @Parameter(property = "generateTestDecorator", defaultValue = "false")
     public boolean generateTestDecorator;
 
+    /**
+     * Override whether the generated static event processor supports reflection
+     * based assignment for initialisation.
+     */
     @Parameter(property = "assignNonPublicMembers", defaultValue = "false")
     public boolean assignNonPublicMembers;
 
+    /**
+     * Compile the source artifacts, placing the results in the build directory
+     */
     @Parameter(property = "compileGenerated", defaultValue = "true")
     public boolean compileGenerated;
 
+    /**
+     * Format the generated source files.
+     */
     @Parameter(property = "formatSource", defaultValue = "true")
     public boolean formatSource;
 
+    /**
+     * Set log level to debug for fluxtion generation.
+     */
     @Parameter(property = "logDebug", defaultValue = "false")
     public boolean logDebug;
+
+    /**
+     * continue build even if fluxtion tool returns an error
+     */
+    @Parameter(property = "ignoreErrors", defaultValue = "false")
+    public boolean ignoreErrors;
 
     private void updateClasspath() throws MojoExecutionException, MalformedURLException, DependencyResolutionRequiredException {
         StringBuilder sb = new StringBuilder();
