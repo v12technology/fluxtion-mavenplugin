@@ -27,6 +27,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
     <packaging>maven-plugin</packaging>
     <name>fluxtion :: maven plugin</name>
 
+    <description>A maven plugin integrating the fluxtion toolset with maven build cycle</description>
+    <url>https://github.com/v12technology/fluxtion-mavenplugin</url>
+
     <properties>
         <maven.version>3.2.5</maven.version>
         <maven.compiler.source>1.8</maven.compiler.source>
