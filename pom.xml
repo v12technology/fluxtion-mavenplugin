@@ -23,9 +23,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
 
     <groupId>com.fluxtion</groupId>
     <artifactId>fluxtion-maven-plugin</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
     <packaging>maven-plugin</packaging>
     <name>fluxtion :: maven plugin</name>
+
     <description>A maven plugin integrating the fluxtion toolset with maven build cycle</description>
     <url>https://github.com/v12technology/fluxtion-mavenplugin</url>
 
@@ -222,6 +223,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
             <groupId>org.twdata.maven</groupId>
             <artifactId>mojo-executor</artifactId>
             <version>2.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>visualiser</artifactId>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
 
