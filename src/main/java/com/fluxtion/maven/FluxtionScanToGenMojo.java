@@ -1,4 +1,4 @@
-package com.fluxtion.tools.maven;
+package com.fluxtion.maven;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
