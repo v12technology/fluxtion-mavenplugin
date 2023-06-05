@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
 
     <groupId>com.fluxtion</groupId>
     <artifactId>fluxtion-maven-plugin</artifactId>
-    <version>3.0.8-SNAPSHOT</version>
+    <version>3.0.8</version>
     <packaging>maven-plugin</packaging>
     <name>fluxtion :: maven plugin</name>
 
@@ -58,7 +58,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses />.
         <connection>scm:git:https://github.com/v12technology/fluxtion-mavenplugin.git</connection>
         <developerConnection>scm:git:https://github.com/v12technology/fluxtion-mavenplugin.git</developerConnection>
         <url>https://github.com/v12technology/fluxtion-mavenplugin</url>
-        <tag>HEAD</tag>
+        <tag>v3.0.8</tag>
     </scm>
 
     <distributionManagement>
