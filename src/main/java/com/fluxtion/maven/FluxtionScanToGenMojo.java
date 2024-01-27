@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @author V12 Technology Ltd.
+ * @author greg higgins
  */
 @Mojo(name = "scan",
         requiresProject = true,
