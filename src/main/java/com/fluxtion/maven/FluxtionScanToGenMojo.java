@@ -1,6 +1,7 @@
 package com.fluxtion.maven;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -62,9 +63,8 @@ public class FluxtionScanToGenMojo extends AbstractMojo {
     }
 
     @SuppressWarnings("Unchecked")
-    private URLClassLoader buildFluxtionClassLoader() throws MalformedURLException {
-        List<Artifact> artifactList = project.getCompileArtifacts();
-        List<String> elements = artifactList.stream().map(Artifact::getFile).map(File::getPath).collect(Collectors.toList());
+    private URLClassLoader buildFluxtionClassLoader() throws MalformedURLException, DependencyResolutionRequiredException {
+        List<String> elements = project.getCompileClasspathElements();
         URL[] urls = new URL[elements.size() + 1];
         urls[0] = new File(buildDirectory).toURI().toURL();
         String cp = buildDirectory;
