@@ -31,8 +31,16 @@ public class FluxtionScanToGenMojo extends AbstractFluxtionMojo {
 
     @Parameter(property = "buildDirectory", defaultValue = "target/classes")
     protected String buildDirectory;
+
+    @Parameter(property = "outputDirectory")
+    protected String outputDirectory;
+
+    @Parameter(property = "resourcesDirectory")
+    protected String resourcesDirectory;
     public static final String GENERATOR_METHOD = "scanAndGenerateFluxtionBuilders";
     public static final String FLUXTION_GENERATOR_CLASS = "com.fluxtion.compiler.Fluxtion";
+    public static final String OUTPUT_DIRECTORY = "FLUXTION.OUTPUT.DIRECTORY";
+    public static final String RESOURCES_DIRECTORY = "FLUXTION.RESOURCES.DIRECTORY";
     @Override
     public void execute() throws MojoExecutionException {
         if (System.getProperty("skipFluxtion") != null) {
@@ -44,6 +52,14 @@ public class FluxtionScanToGenMojo extends AbstractFluxtionMojo {
                 } else if (!buildDirectory.startsWith("/")) {
                     buildDirectory = project.getBasedir().getCanonicalPath() + "/" + buildDirectory;
                 }
+                if(outputDirectory == null){
+                    outputDirectory = project.getBuild().getSourceDirectory();
+                }
+                if(resourcesDirectory == null){
+                    resourcesDirectory = project.getBasedir().getCanonicalPath() + "/src/main/resources";
+                }
+                System.setProperty(OUTPUT_DIRECTORY, outputDirectory);
+                System.setProperty(RESOURCES_DIRECTORY, resourcesDirectory);
                 URLClassLoader classLoader = buildFluxtionClassLoader();
                 Class<?> genClass = classLoader.loadClass(FLUXTION_GENERATOR_CLASS);
                 Method generatorMethod = genClass.getMethod(GENERATOR_METHOD, ClassLoader.class, File[].class);
