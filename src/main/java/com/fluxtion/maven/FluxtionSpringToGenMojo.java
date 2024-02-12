@@ -10,6 +10,9 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URLClassLoader;
 
+import static com.fluxtion.maven.FluxtionScanToGenMojo.OUTPUT_DIRECTORY;
+import static com.fluxtion.maven.FluxtionScanToGenMojo.RESOURCES_DIRECTORY;
+
 /**
  * @author greg higgins
  */
@@ -28,12 +31,26 @@ public class FluxtionSpringToGenMojo extends AbstractFluxtionMojo {
     protected String packageName;
     @Parameter(required = true)
     protected File springFile;
+
+    @Parameter(property = "outputDirectory")
+    protected String outputDirectory;
+
+    @Parameter(property = "resourcesDirectory")
+    protected String resourcesDirectory;
     @Override
     public void execute() throws MojoExecutionException {
         if (System.getProperty("skipFluxtion") != null) {
             getLog().info("Fluxtion generation skipped.");
         } else {
             try {
+                if(outputDirectory == null){
+                    outputDirectory = project.getBuild().getSourceDirectory();
+                }
+                if(resourcesDirectory == null){
+                    resourcesDirectory = project.getBasedir().getCanonicalPath() + "/src/main/resources";
+                }
+                System.setProperty(OUTPUT_DIRECTORY, outputDirectory);
+                System.setProperty(RESOURCES_DIRECTORY, resourcesDirectory);
                 URLClassLoader classLoader = buildFluxtionClassLoader();
                 Class<?> genClass = classLoader.loadClass(FLUXTION_GENERATOR_CLASS);
                 Method generatorMethod = genClass.getMethod(GENERATOR_METHOD, ClassLoader.class, File.class, String.class, String.class);
