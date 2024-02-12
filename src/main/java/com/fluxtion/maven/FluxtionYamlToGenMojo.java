@@ -12,6 +12,9 @@ import java.io.Reader;
 import java.lang.reflect.Method;
 import java.net.URLClassLoader;
 
+import static com.fluxtion.maven.FluxtionScanToGenMojo.OUTPUT_DIRECTORY;
+import static com.fluxtion.maven.FluxtionScanToGenMojo.RESOURCES_DIRECTORY;
+
 /**
  * @author greg higgins support DataDrivenGenerationConfig yaml files to generate a Fluxtion event processor
  */
@@ -22,10 +25,15 @@ import java.net.URLClassLoader;
 )
 public class FluxtionYamlToGenMojo extends AbstractFluxtionMojo {
 
-    @Parameter(required = true)
-    protected File[] fluxtionConfigFiles;
     public static final String GENERATOR_METHOD = "compileFromReader";
     public static final String FLUXTION_GENERATOR_CLASS = "com.fluxtion.compiler.Fluxtion";
+    @Parameter(required = true)
+    protected File[] fluxtionConfigFiles;
+    @Parameter(property = "outputDirectory")
+    protected String outputDirectory;
+
+    @Parameter(property = "resourcesDirectory")
+    protected String resourcesDirectory;
     @Override
     public void execute() throws MojoExecutionException {
         if (System.getProperty("skipFluxtion") != null) {
@@ -34,6 +42,14 @@ public class FluxtionYamlToGenMojo extends AbstractFluxtionMojo {
             try {
                 for (File fluxtionConfigFile : fluxtionConfigFiles) {
                     FileReader fileReader = new FileReader(fluxtionConfigFile);
+                    if(outputDirectory == null){
+                        outputDirectory = project.getBuild().getSourceDirectory();
+                    }
+                    if(resourcesDirectory == null){
+                        resourcesDirectory = project.getBasedir().getCanonicalPath() + "/src/main/resources";
+                    }
+                    System.setProperty(OUTPUT_DIRECTORY, outputDirectory);
+                    System.setProperty(RESOURCES_DIRECTORY, resourcesDirectory);
                     URLClassLoader classLoader = buildFluxtionClassLoader();
                     Class<?> genClass = classLoader.loadClass(FLUXTION_GENERATOR_CLASS);
                     Method generatorMethod = genClass.getMethod(GENERATOR_METHOD, Reader.class);
